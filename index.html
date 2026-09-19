@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+  <head>
+    <meta name="description" content="一款科幻策略养成Web游戏，玩家从1级星球执政官起步，通过完成任务积累经验逐步晋升至100级宇宙之主，体验完整的宇宙官场职位体系和晋升路径。" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>宇宙之主</title>
+    <link rel="stylesheet" href="app.css" />
+    <script>
+      (function () {
+        const redirect = new URLSearchParams(location.search).get('redirect');
+        if (redirect && redirect !== location.pathname) {
+          history.replaceState(null, '', redirect);
+        }
+      })();
+    </script>
+  </head>
+  <body class="bg-[#07090e] text-gray-100 w-full min-h-screen overflow-y-auto overflow-x-hidden">
+    <div id="root" class="w-full min-h-screen"></div>
+    <script id="md-click">
+      window.mdClick = e => {
+        const target = e.target;
+        const {href, target: linkTarget} = target.dataset;
+        const appType = 'web';
+        const isBlank = linkTarget === '_blank';
+
+        if (!href) return;
+
+        e.stopPropagation();
+        e.preventDefault();
+
+        // 外部链接或新窗口打开
+        if (isBlank || href.startsWith('http')) {
+          let finalHref = href;
+          if (appType === 'miniapp' && !href.startsWith('http')) {
+            finalHref = window.location.href.split('#')[0] + '#/' + href;
+          }
+          window.open(finalHref, linkTarget || '_self');
+          return;
+        }
+
+        // 内部路由跳转
+        const finalHref = href.startsWith('/') ? href : '/' + href;
+        if (appType === 'miniapp') {
+          window.location.hash = finalHref;
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        } else {
+          window.history.pushState({}, '', finalHref);
+          window.dispatchEvent(new Event('popstate'));
+        }
+      };
+      document.addEventListener('click', window.mdClick, true);
+    </script>
+    <script src="app.js"></script>
+  </body>
+</html>
